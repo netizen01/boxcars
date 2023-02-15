@@ -312,7 +312,7 @@ pub enum RemoteId {
 
     #[serde(serialize_with = "crate::serde_utils::display_it")]
     QQ(u64),
-    Epic(String),
+    Epic(u64),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -1533,7 +1533,10 @@ fn decode_unique_id_with_system_id(
                 }))
             }
         }
-        11 => Ok(RemoteId::Epic(decode_text(bits, buf)?)),
+        11 => bits
+             .read_u64()
+             .ok_or(AttributeError::NotEnoughDataFor("Epic ID"))
+             .map(RemoteId::Epic),
         x => Err(AttributeError::UnrecognizedRemoteId(x)),
     }?;
 
